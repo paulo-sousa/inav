@@ -609,6 +609,7 @@ COMMON_SRC = \
             rx/ibus.c \
             rx/jetiexbus.c \
             rx/msp.c \
+            rx/uib_rx.c \
             rx/nrf24_cx10.c \
             rx/nrf24_inav.c \
             rx/nrf24_h8_3d.c \
@@ -632,6 +633,8 @@ COMMON_SRC = \
             sensors/diagnostics.c \
             sensors/gyro.c \
             sensors/initialisation.c \
+            uav_interconnect/uav_interconnect_bus.c \
+            uav_interconnect/uav_interconnect_rangefinder.c \
             $(CMSIS_SRC) \
             $(DEVICE_STDPERIPH_SRC)
 
@@ -945,7 +948,7 @@ all: $(VALID_TARGETS)
 $(VALID_TARGETS):
 	$(V0) echo "" && \
 	echo "Building $@" && \
-	$(MAKE) -j TARGET=$@ && \
+	$(MAKE) -j 2 TARGET=$@ && \
 	echo "Building $@ succeeded."
 
 ## clean             : clean up all temporary / machine-generated files
@@ -961,11 +964,11 @@ clean_test:
 
 ## clean_<TARGET>    : clean up one specific target
 $(CLEAN_TARGETS) :
-	$(V0) $(MAKE) -j TARGET=$(subst clean_,,$@) clean
+	$(V0) $(MAKE) -j 2 TARGET=$(subst clean_,,$@) clean
 
 ## <TARGET>_clean    : clean up one specific target (alias for above)
 $(TARGETS_CLEAN) :
-	$(V0) $(MAKE) -j TARGET=$(subst _clean,,$@) clean
+	$(V0) $(MAKE) -j 2 TARGET=$(subst _clean,,$@) clean
 
 ## clean_all         : clean all valid targets
 clean_all:$(CLEAN_TARGETS)
