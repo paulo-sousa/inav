@@ -36,6 +36,16 @@
 #include "opflow_fake.h"
 
 #ifdef USE_OPFLOW_FAKE
+static opflowData_t fakeData;
+
+void fakeOpflowSet(timeDelta_t deltaTime, int32_t flowRateX, int32_t flowRateY, int16_t quality)
+{
+    fakeData.deltaTime = deltaTime;
+    fakeData.flowRateRaw[0] = flowRateX;
+    fakeData.flowRateRaw[1] = flowRateY;
+    fakeData.quality = quality;
+}
+
 static bool fakeOpflowInit(opflowDev_t * dev)
 {
     UNUSED(dev);
@@ -44,17 +54,14 @@ static bool fakeOpflowInit(opflowDev_t * dev)
 
 static bool fakeOpflowUpdate(opflowDev_t * dev)
 {
-    dev->rawData.flowRateRaw[0] = 0;
-    dev->rawData.flowRateRaw[1] = 0;
-    dev->rawData.quality = 100;
-    dev->rawData.deltaTime = 1000;  // 1ms
+    memcpy(&dev->rawData, &fakeData, sizeof(opflowData_t));
     return true;
 }
 
 bool fakeOpflowDetect(opflowDev_t * dev)
 {
-    dev->init = &fakeOpflowInit;
-    dev->update = &fakeOpflowUpdate;
+    dev->initFn = &fakeOpflowInit;
+    dev->updateFn = &fakeOpflowUpdate;
 
     memset(&dev->rawData, 0, sizeof(opflowData_t));
 

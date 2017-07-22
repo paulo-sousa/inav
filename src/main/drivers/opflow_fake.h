@@ -25,3 +25,4 @@
 #pragma once
 
 bool fakeOpflowDetect(opflowDev_t * dev);
+void fakeOpflowSet(timeDelta_t deltaTime, int32_t flowRateX, int32_t flowRateY, int16_t quality);

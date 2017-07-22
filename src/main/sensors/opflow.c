@@ -115,7 +115,7 @@ bool opflowInit(void)
         return false;
     }
 
-    opflow.dev.init(&opflow.dev);
+    opflow.dev.initFn(&opflow.dev);
     opflowZeroBodyGyroAcc();
 
     return true;
@@ -126,10 +126,10 @@ bool opflowInit(void)
  */
 void opflowUpdate(timeUs_t currentTimeUs)
 {
-    if (!opflow.dev.update)
+    if (!opflow.dev.updateFn)
         return;
 
-    if (opflow.dev.update(&opflow.dev)) {
+    if (opflow.dev.updateFn(&opflow.dev)) {
         // Indicate valid update
         opflow.lastValidUpdate = currentTimeUs;
         opflow.isHwHealty = true;

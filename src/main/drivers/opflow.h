@@ -30,13 +30,13 @@
 struct opflowDev_s;
 
 typedef struct opflowData_s {
+    timeDelta_t deltaTime;      // Integration timeframe of motionX/Y
     int32_t     flowRateRaw[2]; // Flow rotation in raw sensor uints (per deltaTime interval)
     int16_t     quality;
-    timeDelta_t deltaTime;      // Integration timeframe of motionX/Y
 } opflowData_t;
 
 typedef struct opflowDev_s {
-    sensorOpflowInitFuncPtr init;
-    sensorOpflowUpdateFuncPtr update;
+    sensorOpflowInitFuncPtr initFn;
+    sensorOpflowUpdateFuncPtr updateFn;
     opflowData_t rawData;
 } opflowDev_t;

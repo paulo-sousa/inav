@@ -189,17 +189,6 @@ void taskUpdateRangefinder(timeUs_t currentTimeUs)
 }
 #endif
 
-#ifdef USE_OPTICAL_FLOW
-void taskUpdateOpticalFlow(timeUs_t currentTimeUs)
-{
-    UNUSED(currentTimeUs);
-
-    if (sensors(SENSOR_OPFLOW)) {
-        opflowUpdate(currentTimeUs);
-    }
-}
-#endif
- 
 #ifdef USE_DASHBOARD
 void taskDashboardUpdate(timeUs_t currentTimeUs)
 {
@@ -538,7 +527,7 @@ cfTask_t cfTasks[TASK_COUNT] = {
 #ifdef USE_OPTICAL_FLOW
     [TASK_OPFLOW] = {
         .taskName = "OPFLOW",
-        .taskFunc = taskUpdateOpticalFlow,
+        .taskFunc = opflowUpdate,
         .desiredPeriod = TASK_PERIOD_HZ(100),   // I2C/SPI sensor will work at higher rate and accumulate, UIB sensor will work at lower rate w/o accumulation
         .staticPriority = TASK_PRIORITY_MEDIUM,
     },
