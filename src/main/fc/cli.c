@@ -105,6 +105,7 @@ extern uint8_t __config_end;
 #include "sensors/gyro.h"
 #include "sensors/pitotmeter.h"
 #include "sensors/rangefinder.h"
+#include "sensors/opflow.h"
 #include "sensors/sensors.h"
 
 #include "telemetry/frsky.h"
@@ -172,25 +173,28 @@ static const char * const lookupTableMagHardware[] = { "NONE", "AUTO", "HMC5883"
 static const char * const lookupTableRangefinderHardware[] = { "NONE", "HCSR04", "SRF10", "HCSR04I2C"};
 // sync with pitotSensor_e
 static const char * const lookupTablePitotHardware[] = { "NONE", "AUTO", "MS4525", "ADC", "VIRTUAL", "FAKE"};
+// sync with opticalFlowSensor_e
+static const char * const lookupTableOpflowHardware[] = { "NONE", "FAKE"};
 
 // sync this with sensors_e
 static const char * const sensorTypeNames[] = {
-    "GYRO", "ACC", "BARO", "MAG", "RANGEFINDER", "PITOT", "GPS", "GPS+MAG", NULL
+    "GYRO", "ACC", "BARO", "MAG", "RANGEFINDER", "PITOT", "OPFLOW", "GPS", "GPS+MAG", NULL
 };
 
-#define SENSOR_NAMES_MASK (SENSOR_GYRO | SENSOR_ACC | SENSOR_BARO | SENSOR_MAG | SENSOR_RANGEFINDER | SENSOR_PITOT)
+#define SENSOR_NAMES_MASK (SENSOR_GYRO | SENSOR_ACC | SENSOR_BARO | SENSOR_MAG | SENSOR_RANGEFINDER | SENSOR_PITOT | SENSOR_OPFLOW)
 
 static const char * const hardwareSensorStatusNames[] = {
     "NONE", "OK", "UNAVAILABLE", "FAILING"
 };
 
 static const char * const *sensorHardwareNames[] = {
-        gyroNames,
-        lookupTableAccHardware,
-        lookupTableBaroHardware,
-        lookupTableMagHardware,
-        lookupTableRangefinderHardware,
-        lookupTablePitotHardware
+    gyroNames,
+    lookupTableAccHardware,
+    lookupTableBaroHardware,
+    lookupTableMagHardware,
+    lookupTableRangefinderHardware,
+    lookupTablePitotHardware,
+    lookupTableOpflowHardware,
 };
 #endif
 
@@ -398,6 +402,9 @@ typedef enum {
 #ifdef TELEMETRY_LTM
     TABLE_LTM_UPDATE_RATE,
 #endif
+#ifdef USE_OPTICAL_FLOW
+    TABLE_OPFLOW_HARDWARE,
+#endif
     LOOKUP_TABLE_COUNT
 } lookupTableIndex_e;
 
@@ -454,6 +461,9 @@ static const lookupTableEntry_t lookupTables[] = {
     { lookupTableDebug, sizeof(lookupTableDebug) / sizeof(char *) },
 #ifdef TELEMETRY_LTM
     {lookupTableLTMRates, sizeof(lookupTableLTMRates) / sizeof(char *) },
+#endif
+#ifdef USE_OPTICAL_FLOW
+    {lookupTableOpflowHardware, sizeof(lookupTableOpflowHardware) / sizeof(char *) },
 #endif
 };
 
@@ -585,6 +595,12 @@ static const clivalue_t valueTable[] = {
     { "pitot_use_median_filter",    VAR_UINT8  | MASTER_VALUE | MODE_LOOKUP, .config.lookup = { TABLE_OFF_ON }, PG_PITOTMETER_CONFIG, offsetof(pitotmeterConfig_t, use_median_filtering) },
     { "pitot_noise_lpf",            VAR_FLOAT  | MASTER_VALUE, .config.minmax = { 0, 1 }, PG_PITOTMETER_CONFIG, offsetof(pitotmeterConfig_t, pitot_noise_lpf) },
     { "pitot_scale",                VAR_FLOAT  | MASTER_VALUE, .config.minmax = { 0, 100 }, PG_PITOTMETER_CONFIG, offsetof(pitotmeterConfig_t, pitot_scale) },
+#endif
+
+// PG_OPFLOW_CONFIG
+#ifdef USE_OPTICAL_FLOW
+    { "opflow_hardware",            VAR_UINT8  | MASTER_VALUE | MODE_LOOKUP, .config.lookup = { TABLE_OPFLOW_HARDWARE }, PG_OPFLOW_CONFIG, offsetof(opticalFlowConfig_t, opflow_hardware) },
+    { "opflow_scale",               VAR_FLOAT  | MASTER_VALUE, .config.minmax = { 0, 10000 }, PG_OPFLOW_CONFIG, offsetof(opticalFlowConfig_t, opflow_scale) },
 #endif
 
 // PG_RX_CONFIG
@@ -3134,12 +3150,13 @@ static void cliStatus(char *cmdline)
     }
     cliPrint("\r\n");
 
-    cliPrintf("Sensor status: GYRO=%s, ACC=%s, MAG=%s, BARO=%s, RANGEFINDER=%s, GPS=%s\r\n",
+    cliPrintf("Sensor status: GYRO=%s, ACC=%s, MAG=%s, BARO=%s, RANGEFINDER=%s, OPFLOW=%s, GPS=%s\r\n",
         hardwareSensorStatusNames[getHwGyroStatus()],
         hardwareSensorStatusNames[getHwAccelerometerStatus()],
         hardwareSensorStatusNames[getHwCompassStatus()],
         hardwareSensorStatusNames[getHwBarometerStatus()],
         hardwareSensorStatusNames[getHwRangefinderStatus()],
+        hardwareSensorStatusNames[getHwOpticalFlowStatus()],
         hardwareSensorStatusNames[getHwGPSStatus()]
     );
 #endif

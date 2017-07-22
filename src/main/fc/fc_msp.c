@@ -90,6 +90,7 @@
 #include "sensors/pitotmeter.h"
 #include "sensors/compass.h"
 #include "sensors/gyro.h"
+#include "sensors/opflow.h"
 
 #include "telemetry/telemetry.h"
 
@@ -390,7 +391,7 @@ static uint16_t packSensorStatus(void)
             IS_ENABLED(sensors(SENSOR_MAG))     << 2 |
             IS_ENABLED(sensors(SENSOR_GPS))     << 3 |
             IS_ENABLED(sensors(SENSOR_RANGEFINDER))   << 4 |
-            //IS_ENABLED(sensors(SENSOR_OPFLOW))  << 5 |
+            IS_ENABLED(sensors(SENSOR_OPFLOW))  << 5 |
             IS_ENABLED(sensors(SENSOR_PITOT))   << 6;
 
     // Hardware failure indication bit
@@ -549,7 +550,7 @@ static bool mspFcProcessOutCommand(uint8_t cmdMSP, sbuf_t *dst, mspPostProcessFn
         sbufWriteU8(dst, getHwGPSStatus());
         sbufWriteU8(dst, getHwRangefinderStatus());
         sbufWriteU8(dst, getHwPitotmeterStatus());
-        sbufWriteU8(dst, HW_SENSOR_NONE);                   // Optical flow
+        sbufWriteU8(dst, getHwOpticalFlowStatus());
         break;
 
     case MSP_STATUS_EX:

@@ -65,6 +65,9 @@
 //#define USE_PITOT_MS4525
 //#define PITOT_I2C_INSTANCE      I2C_DEVICE_EXT
 
+#define USE_OPTICAL_FLOW
+#define USE_OPFLOW_FAKE
+
 #define M25P16_CS_PIN           PB3
 #define M25P16_SPI_INSTANCE     SPI3
 

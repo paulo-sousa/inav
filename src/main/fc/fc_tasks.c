@@ -71,6 +71,7 @@
 #include "sensors/gyro.h"
 #include "sensors/pitotmeter.h"
 #include "sensors/rangefinder.h"
+#include "sensors/opflow.h"
 
 #include "telemetry/telemetry.h"
 
@@ -188,6 +189,17 @@ void taskUpdateRangefinder(timeUs_t currentTimeUs)
 }
 #endif
 
+#ifdef USE_OPTICAL_FLOW
+void taskUpdateOpticalFlow(timeUs_t currentTimeUs)
+{
+    UNUSED(currentTimeUs);
+
+    if (sensors(SENSOR_OPFLOW)) {
+        opflowUpdate(currentTimeUs);
+    }
+}
+#endif
+ 
 #ifdef USE_DASHBOARD
 void taskDashboardUpdate(timeUs_t currentTimeUs)
 {
@@ -326,6 +338,9 @@ void fcTasksInit(void)
 #else
     setTaskEnabled(TASK_CMS, feature(FEATURE_OSD) || feature(FEATURE_DASHBOARD));
 #endif
+#endif
+#ifdef USE_OPTICAL_FLOW
+    setTaskEnabled(TASK_OPFLOW, sensors(SENSOR_OPFLOW));
 #endif
 }
 
@@ -517,6 +532,15 @@ cfTask_t cfTasks[TASK_COUNT] = {
         .taskFunc = cmsHandler,
         .desiredPeriod = 1000000 / 60,          // 60 Hz
         .staticPriority = TASK_PRIORITY_LOW,
+    },
+#endif
+
+#ifdef USE_OPTICAL_FLOW
+    [TASK_OPFLOW] = {
+        .taskName = "OPFLOW",
+        .taskFunc = taskUpdateOpticalFlow,
+        .desiredPeriod = TASK_PERIOD_HZ(100),   // I2C/SPI sensor will work at higher rate and accumulate, UIB sensor will work at lower rate w/o accumulation
+        .staticPriority = TASK_PRIORITY_MEDIUM,
     },
 #endif
 };
